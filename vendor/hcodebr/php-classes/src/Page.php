@@ -12,6 +12,8 @@ class Page{
  
     //Atributos da Classe
     // create the Tpl object
+     private $tpl;
+     private $options = []; 
      private $defaults = [
       "header"=>true,
       "footer"=>true,
@@ -24,14 +26,11 @@ class Page{
         //Pede para o array chamado no parametro sobrescrever o da classe
         $this->options = array_merge($this->defaults,$opts);
 
-        
-        
 
-        
  
         //Pede para o construtor procurar os templates a partir da pasta expecificada
         $config = array(
-            "tpl_dir"       => "C:\ecommerce". "/views/",
+            "tpl_dir"       => $_SERVER["DOCUMENT_ROOT"]. "/views/",
             "cache_dir"     => $_SERVER["DOCUMENT_ROOT"]."/views-cache/",
             "debug"         => false // set to false to improve the speed
         );
@@ -41,13 +40,17 @@ class Page{
         Tpl::configure( $config );
  
         $this->tpl = new Tpl;
+
  
        if ($this->options['data']) $this->setData($this->options['data']);
 
        //Diz qual o primeiro arquivo a ser renderizado
         //Renderizando o arquivo header da pasta /views
 
-       if ($this->options['header'] === true) $this->tpl->draw("header", false);
+       if ($this->options['header'] === true) {
+
+        $this->tpl->draw("header", false);
+       }
 
     }
  
@@ -58,6 +61,7 @@ class Page{
         }
     }
  
+    //Desenha conteúdo principal na tela
     public function setTpl($name, $data = array(), $returnHTML = false){
  
         $this->setData($data);
@@ -67,10 +71,7 @@ class Page{
  
     }
 
- 
- 
- 
- 
+
     //Cria o método que é executado na finalização do objeto
     public function __destruct()
     {
@@ -79,8 +80,7 @@ class Page{
         
     }
  
- 
- 
+
 }
  
  
