@@ -21,7 +21,7 @@ class Page{
     ];
  
     //Cria o método construtor
-    public function __construct($opts = array()){
+    public function __construct($opts = array(), $tpl_dir = "/views/"){
  
         //Pede para o array chamado no parametro sobrescrever o da classe
         $this->options = array_merge($this->defaults,$opts);
@@ -30,7 +30,7 @@ class Page{
  
         //Pede para o construtor procurar os templates a partir da pasta expecificada
         $config = array(
-            "tpl_dir"       => $_SERVER["DOCUMENT_ROOT"]. "/views/",
+            "tpl_dir"       => $_SERVER["DOCUMENT_ROOT"]. $tpl_dir,
             "cache_dir"     => $_SERVER["DOCUMENT_ROOT"]."/views-cache/",
             "debug"         => false // set to false to improve the speed
         );
