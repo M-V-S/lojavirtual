@@ -79,7 +79,10 @@ class Page{
     public function __destruct()
     {
         //Renderiza no final da pagina o Arquivo Footer em /views
-        $this->tpl->draw("footer");
+       if ($this->options['header'] === true) {
+
+        $this->tpl->draw("footer", false);
+       }
         
     }
  
