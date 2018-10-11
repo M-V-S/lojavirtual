@@ -42,8 +42,11 @@ class Page{
         $this->tpl = new Tpl;
 
  
-       if ($this->options['data']) $this->setData($this->options['data']);
+         if ($this->options['data']) {
 
+          $this->setData($this->options['data']);
+          
+          }
        //Diz qual o primeiro arquivo a ser renderizado
         //Renderizando o arquivo header da pasta /views
 
@@ -67,7 +70,7 @@ class Page{
         $this->setData($data);
  
         //Desenha um template na tela 
-        return $this->tlp->draw($name,$returnHTML);
+        return $this->tpl->draw($name,$returnHTML);
  
     }
 
