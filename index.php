@@ -7,6 +7,7 @@ $app = new \Slim\Slim();
 use \Hcode\Page;
 use \Hcode\PageAdmin;
 use \Hcode\Model\User;
+use \Hcode\Model\Category;
 
 
 
@@ -27,6 +28,7 @@ $app->get('/admin', function(){
 	$pageAdmin->setTpl("index");
 
 });
+/*------------------LOGIN-----------------------*/
 //solicitar pagina login
 $app->get('/admin/login', function(){
 	$pageAdmin = new PageAdmin($opts = array(
@@ -50,6 +52,8 @@ $app->get('/admin/logout', function(){
 	header("Location: /admin/login");
 	exit();
 });
+
+/*------------------CRUD USER-----------------------*/
 //carregar todos os usuários
 $app->get('/admin/users', function(){
 	User::verifyLogin();
@@ -145,7 +149,9 @@ $app->post('/admin/users/:iduser', function($iduser){
 	exit();
 
 });
+/*------------------FIM CRUD-----------------------*/
 
+/*------------------ESQUECEU SUA SENHA-----------------------*/
 //pedir pagina recuperação da senha
 $app->get('/admin/forgot', function(){
 	
@@ -219,7 +225,20 @@ $app->post('/admin/forgot/reset', function(){
 
 	$pageAdmin->setTpl("forgot-reset-success");
 	exit();	
-});
+	});
+	/*------------------END CRUD USER-----------------------*/
+
+	/*------------------CRUD CATEGORIAS-----------------------*/
+	$app->get("/admin/categories", function(){
+		User::verifyLogin();
+		$pageAdmin = new PageAdmin();
+		
+		$categories = Category::listAll();
+
+		$pageAdmin->setTpl("categories", array(
+			"categories"=>$categories
+		));
+	});
 
 
 $app->run();
