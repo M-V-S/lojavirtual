@@ -231,13 +231,17 @@ $app->post('/admin/forgot/reset', function(){
 	/*------------------CRUD CATEGORIAS-----------------------*/
 	$app->get("/admin/categories", function(){
 		User::verifyLogin();
-		$pageAdmin = new PageAdmin();
+		
 		
 		$categories = Category::listAll();
+
+		$pageAdmin = new PageAdmin();
 
 		$pageAdmin->setTpl("categories", array(
 			"categories"=>$categories
 		));
+
+		exit();	
 	});
 
 
