@@ -154,7 +154,7 @@ $app->post('/admin/users/:iduser', function($iduser){
 /*------------------ESQUECEU SUA SENHA-----------------------*/
 //pedir pagina recuperação da senha
 $app->get('/admin/forgot', function(){
-	
+	User::verifyLogin();
 	$pageAdmin = new PageAdmin($opts = array(
 		"header" => false,
 		"folter" => false
@@ -166,6 +166,7 @@ $app->get('/admin/forgot', function(){
 
 //receber email do forgot.html
 $app->post('/admin/forgot', function(){
+	User::verifyLogin();
 	User::getForgot($_POST["email"]);
 
 	header("Location: /admin/forgot/sent");
@@ -174,6 +175,7 @@ $app->post('/admin/forgot', function(){
 
 //pagina para mostrar que o email foi enviado com sucesso
 $app->get('/admin/forgot/sent', function(){
+	User::verifyLogin();
 	$pageAdmin = new PageAdmin($opts = array(
 		"header" => false,
 		"folter" => false
@@ -185,7 +187,7 @@ $app->get('/admin/forgot/sent', function(){
 
 //apos o usuário clicar no link no email dele, ele é redirecionado para a rota asseguir 
 $app->get('/admin/forgot/reset', function(){
-
+	User::verifyLogin();
 
 	$user = User::validForgotDecrypt($_GET["code"]);
 
@@ -203,7 +205,7 @@ $app->get('/admin/forgot/reset', function(){
 
 
 $app->post('/admin/forgot/reset', function(){
-
+	User::verifyLogin();
 
 	$forgot = User::validForgotDecrypt($_POST["code"]);
 
@@ -229,7 +231,7 @@ $app->post('/admin/forgot/reset', function(){
 	/*------------------END CRUD USER-----------------------*/
 
 	/*------------------CRUD CATEGORIAS-----------------------*/
-	$app->get("/admin/categories", function(){
+	$app->get('/admin/categories', function(){
 		User::verifyLogin();
 		
 		
@@ -243,6 +245,47 @@ $app->post('/admin/forgot/reset', function(){
 
 		exit();	
 	});
+
+	$app->get('/admin/categories/create', function(){
+		User::verifyLogin();
+		$pageAdmin = new PageAdmin();
+
+		$pageAdmin->setTpl("categories-create");
+
+		exit();		
+	});
+
+
+
+	//receber post 
+	$app->post('/admin/categories/create', function(){
+		User::verifyLogin();
+
+		$category = new Category();
+
+		$category->setData($_POST);
+
+		$category->save();
+
+		header("Location: /admin/categories");
+		exit();
+
+	});
+
+	$app->get('/admin/categories/:idcategory/delete', function($idcategory){
+		User::verifyLogin();
+
+		$category = new Category();
+
+		$category->get((int)$idcategory);
+
+		$category->delete();
+
+		header("Location: /admin/categories");
+		exit();
+	});
+
+	
 
 
 $app->run();
