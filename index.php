@@ -285,6 +285,41 @@ $app->post('/admin/forgot/reset', function(){
 		exit();
 	});
 
+	$app->get('/admin/categories/:idcategory', function($idcategory){
+		User::verifyLogin();
+
+		$category = new Category();
+
+		$category->get((int)$idcategory);
+
+		$pageAdmin = new PageAdmin();
+
+		$pageAdmin->setTpl("categories-update", array(
+			"category"=>$category->getValues()
+		));
+
+		exit();	
+	});
+
+	$app->post('/admin/categories/:idcategory', function($idcategory){
+		User::verifyLogin();
+
+		$category = new Category();
+
+		$category->get((int)$idcategory);
+
+		$category->setData($_POST);
+
+		$category->save();
+
+		header("Location: /admin/categories");
+
+		exit();	
+	});
+
+
+
+
 	
 
 
