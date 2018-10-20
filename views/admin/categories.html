@@ -27,9 +27,8 @@
                 <thead>
                   <tr>
                     <th style="width: 10px">#</th>
-
-                    <th>Nome Categoria</th>
-                    <th ">Data</th>
+                    <th>Nome da Categoria</th>
+                    <th style="width: 140px">&nbsp;</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -37,10 +36,9 @@
                   <tr>
                     <td>{$value.idcategory}</td>
                     <td>{$value.descategory}</td>
-                    <td>{$value.dtregister}</td>
                     <td>
                       <a href="/admin/categories/{$value.idcategory}" class="btn btn-primary btn-xs"><i class="fa fa-edit"></i> Editar</a>
-                      <a href="/admin/categories/{$value.idcategory}/delete" onclick="return confirm('Deseja realmente excluir este registro?')" class="Nome btn btn-danger btn-xs"><i class="fa fa-trash"></i> Excluir</a>
+                      <a href="/admin/categories/{$value.idcategory}/delete" onclick="return confirm('Deseja realmente excluir este registro?')" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i> Excluir</a>
                     </td>
                   </tr>
                   {/loop}
