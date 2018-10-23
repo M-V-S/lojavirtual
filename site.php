@@ -15,20 +15,21 @@ $app->get('/', function() {
     ]);
 });
 
-
 //CATEGORIA STORE
 $app->get('/categories/:idcategory', function($idcategory){
+	
+    $category = new Category();
 
-	 $category = new Category();
+	$category->get((int)$idcategory);
 
-	 $category->get((int)$idcategory);
-
-	$page = new Page();
+    $page = new Page();
     $page->setTpl("category", [
     	"category"=> $category->getValues(),
-    	//"products"=>$products[]
+    	"products"=>Product::checkList($category->getProducts())
     ]);
 });
+
+
 
 
 

@@ -38,7 +38,7 @@ $app->get('/admin/logout', function(){
 /*------------------ESQUECEU SUA SENHA-----------------------*/
 //pedir pagina recuperação da senha
 $app->get('/admin/forgot', function(){
-	User::verifyLogin();
+	
 	$pageAdmin = new PageAdmin($opts = array(
 		"header" => false,
 		"folter" => false
@@ -50,7 +50,7 @@ $app->get('/admin/forgot', function(){
 
 //receber email do forgot.html
 $app->post('/admin/forgot', function(){
-	User::verifyLogin();
+	
 	User::getForgot($_POST["email"]);
 
 	header("Location: /admin/forgot/sent");
@@ -59,7 +59,7 @@ $app->post('/admin/forgot', function(){
 
 //pagina para mostrar que o email foi enviado com sucesso
 $app->get('/admin/forgot/sent', function(){
-	User::verifyLogin();
+	
 	$pageAdmin = new PageAdmin($opts = array(
 		"header" => false,
 		"folter" => false
@@ -71,7 +71,7 @@ $app->get('/admin/forgot/sent', function(){
 
 //apos o usuário clicar no link no email dele, ele é redirecionado para a rota asseguir 
 $app->get('/admin/forgot/reset', function(){
-	User::verifyLogin();
+	
 
 	$user = User::validForgotDecrypt($_GET["code"]);
 
@@ -89,7 +89,7 @@ $app->get('/admin/forgot/reset', function(){
 
 
 $app->post('/admin/forgot/reset', function(){
-	User::verifyLogin();
+	
 
 	$forgot = User::validForgotDecrypt($_POST["code"]);
 

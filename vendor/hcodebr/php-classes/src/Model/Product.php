@@ -25,8 +25,6 @@ class Product extends Model
 
 	public function save(){
 		$sql = new Sql();
-
-
 		$results = $sql->select("CALL sp_products_save(:idproduct, :desproduct, :vlprice, :vlwidth, :vlheight, :vllength, :vlweight, :desurl)", array(
 			":idproduct"=>$this->getidproduct(),
 			":desproduct"=>$this->getdesproduct(),
