@@ -8,110 +8,142 @@ use \Hcode\Model;
 class Category extends Model
 {
 
-	public static function listAll(){
-		$sql = new Sql();
+    public function save()
+    {
+        $sql = new Sql();
 
-		return $sql->select("SELECT * FROM tb_categories ORDER BY descategory");
-	}
+        $results = $sql->select("CALL sp_categories_save(:idcategory, :descategory)", array(
+            ":idcategory" => $this->getidcategory(),
+            ":descategory" => $this->getdescategory()
+        ));
 
-	public function save(){
-		$sql = new Sql();
+        $this->setData($results[0]);
 
-		$results = $sql->select("CALL sp_categories_save(:idcategory, :descategory)", array(
-			":idcategory"=>$this->getidcategory(),
-			":descategory"=>$this->getdescategory()
-		));
+        Category::updateFile();
+    }
 
-		$this->setData($results[0]);
+    public static function updateFile()
+    {
+        $categories = Category::listAll();
 
-		Category::updateFile();
-	}
+        $html = [];
 
-	public function get($idcategory){
+        foreach ($categories as $row) {
+            array_push($html, '<li><a href="/categories/' . $row['idcategory'] . '">' . $row['descategory'] . '</a></li>');
+        }
+        file_put_contents($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR . "categories-menu.html", implode('', $html));
+    }
 
-		$sql = new Sql();
+    public static function listAll()
+    {
+        $sql = new Sql();
 
-		$results = $sql->select("SELECT * FROM tb_categories WHERE idcategory = :idcategory", array(
-			":idcategory"=>$idcategory
-		));
+        return $sql->select("SELECT * FROM tb_categories ORDER BY descategory");
+    }
 
-		$this->setData($results[0]);
-	}
+    public function get($idcategory)
+    {
 
-	public function delete(){
-		$sql = new Sql();
+        $sql = new Sql();
 
-		$sql->query("DELETE FROM tb_categories WHERE idcategory = :idcategory", [
-			':idcategory'=>$this->getidcategory()
-		]);
+        $results = $sql->select("SELECT * FROM tb_categories WHERE idcategory = :idcategory", array(
+            ":idcategory" => $idcategory
+        ));
 
-		Category::updateFile();
-		
-	}
+        $this->setData($results[0]);
+    }
 
-	public static function updateFile(){
-		$categories = Category::listAll();
+    public function delete()
+    {
+        $sql = new Sql();
 
-		$html = [];
+        $sql->query("DELETE FROM tb_categories WHERE idcategory = :idcategory", [
+            ':idcategory' => $this->getidcategory()
+        ]);
 
-		foreach ($categories as $row) {
-			array_push($html, '<li><a href="/categories/'.$row['idcategory'].'">'.$row['descategory'].'</a></li>');
-		}
-		file_put_contents($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR . "categories-menu.html", implode('', $html));
-	}
+        Category::updateFile();
 
-	public function getProducts($related = true){
-		$sql = new Sql();
-	
-		if ($related === true) {
-			
-			return $sql->select("SELECT * FROM tb_products where idproduct IN(
+    }
+
+    public function getProducts($related = true)
+    {
+        $sql = new Sql();
+
+        if ($related === true) {
+
+            return $sql->select("SELECT * FROM tb_products where idproduct IN(
 								    SELECT a.idproduct FROM tb_products a 
 								    INNER JOIN tb_productscategories b 
 								    on a.idproduct = b.idproduct 
 								    WHERE b.idcategory = :idcategory)",
-			    [
-			    	":idcategory"=>$this->getidcategory()		
-			    ]);
-		}else{
-		
-			return $sql->select("SELECT * FROM tb_products where idproduct NOT IN(
+                [
+                    ":idcategory" => $this->getidcategory()
+                ]);
+        } else {
+
+            return $sql->select("SELECT * FROM tb_products where idproduct NOT IN(
 								    SELECT a.idproduct FROM tb_products a 
 								    INNER JOIN tb_productscategories b 
 								    on a.idproduct = b.idproduct 
 								    WHERE b.idcategory = :idcategory)",
-			    [
-			    	":idcategory"=>$this->getidcategory()		
-			    ]);
+                [
+                    ":idcategory" => $this->getidcategory()
+                ]);
 
-		}
-	}
+        }
+    }
 
-	public function addProduct(Product $product){
-		$sql = new Sql();
+    public function getProductsPage($page = 1, $itensPerPage = 8)
+    {
+        $start = ($page - 1) * $itensPerPage;
+        $sql = new Sql();
 
-		$sql->query("INSERT INTO tb_productscategories(idcategory, idproduct) VALUES(:idcategory, :idproduct)",
-			[
-				":idcategory"=>$this->getidcategory(),
-				":idproduct"=>$product->getidproduct()
-			]
-	);
+        $results = $sql->select("
+         SELECT SQL_CALC_FOUND_ROWS * 
+             FROM tb_products a 
+             INNER JOIN tb_productscategories b on a.idproduct = b.idproduct 
+             INNER JOIN tb_categories c on c.idcategory = b.idcategory
+             WHERE c.idcategory = :idcategory 
+             LIMIT $start, $itensPerPage 
+        ", [
+            ":idcategory" => $this->getidcategory()
+        ]);
+        //select para retorna a quantidade de registros
+        $resultTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal");
 
-	}
+        return [
+            "data" => Product::checkList($results),
+            "total" => $resultTotal[0]["nrtotal"],
+            "pages" => ceil($resultTotal[0]["nrtotal"] / $itensPerPage)
+        ];
+    }
 
-	public function removeProduct(Product $product){
-		
-		$sql = new Sql();
-		
+    public function addProduct(Product $product)
+    {
+        $sql = new Sql();
+
+        $sql->query("INSERT INTO tb_productscategories(idcategory, idproduct) VALUES(:idcategory, :idproduct)",
+            [
+                ":idcategory" => $this->getidcategory(),
+                ":idproduct" => $product->getidproduct()
+            ]
+        );
+
+    }
+
+    public function removeProduct(Product $product)
+    {
+
+        $sql = new Sql();
 
 
-		$sql->query("DELETE FROM tb_productscategories WHERE idcategory = :idcategory AND idproduct = :idproduct",[
-				':idcategory'=>$this->getidcategory(),
-				':idproduct'=>$product->getidproduct()
-			]);	
-	}
+        $sql->query("DELETE FROM tb_productscategories WHERE idcategory = :idcategory AND idproduct = :idproduct", [
+            ':idcategory' => $this->getidcategory(),
+            ':idproduct' => $product->getidproduct()
+        ]);
+    }
 
-		
+
 }
 
 
