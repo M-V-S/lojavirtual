@@ -6,11 +6,48 @@ use \Hcode\DB\Sql;
 use \Hcode\Model;
 use \Hcode\Mailer;
 
+
 class User extends Model
 {
 
     const SESSION = "User";
     const SECRET = "HcodePhp7_Secret";
+
+    public static function getFromSession(){
+        $user = new User();
+        //se o isset for true e id for > 0, significa que o usuário já foi criado no bd e o usuário esta logado
+        if (isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['iduser'] > 0) {
+           $this->setData($_SESSION[User::SESSION]);
+        }
+
+        return $user;
+    }
+
+    public static function checkLogin()
+    {
+        if (
+            !isset($_SESSION[User::SESSION])
+            ||
+            !$_SESSION[User::SESSION]
+            ||
+            !(int)$_SESSION[User::SESSION]['iduser'] > 0
+        ) {
+            //não esta logado
+            return false;
+        }else{
+            //só acessa o if se for admin
+            if ($inadmin === true && (bool)$_SESSION[User::SESSION]['iduser'] === true) {
+                return true;
+                
+            }else if ($inadmin === false) {
+                return true;
+            }else{
+                return false;
+            }
+            
+        }
+
+    }
 
     public static function login($login, $password)
     {
@@ -46,15 +83,7 @@ class User extends Model
 
     public static function verifyLogin($inadmin = true)
     {
-        if (
-            !isset($_SESSION[User::SESSION])
-            ||
-            !$_SESSION[User::SESSION]
-            ||
-            !(int)$_SESSION[User::SESSION]['iduser'] > 0
-            ||
-            (bool)$_SESSION[User::SESSION]['inadmin'] !== $inadmin
-        ) {
+        if (User::checkLogin($inadmin)) {
 
             header("Location: /admin/login");
             exit();
