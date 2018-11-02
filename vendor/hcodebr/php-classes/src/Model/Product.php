@@ -39,8 +39,6 @@ class Product extends Model
         ));
 
         $this->setData($results[0]);
-
-
     }
 
 
@@ -98,11 +96,9 @@ class Product extends Model
 
     public function setPhoto($file)
     {
-
         $extension = explode('.', $file['name']);
 
         $extension = end($extension);
-
 
         switch ($extension) {
             case "jpg":
@@ -130,30 +126,28 @@ class Product extends Model
         $this->checkPhoto();
     }
 
-    public function getFromURL($url){
+    public function getFromURL($url)
+    {
         $sql = new Sql();
 
         $rows = $sql->select("SELECT * FROM tb_products WHERE desurl = :desurl LIMIT 1", [
-            ":desurl"=>$url
+            ":desurl" => $url
         ]);
 
         $this->setData($rows[0]);
-
-
     }
 
-    public function getCategories(){
+    public function getCategories()
+    {
         $sql = new Sql();
 
         return $sql->select(
             "SELECT * FROM tb_categories a INNER JOIN tb_productscategories b on a.idcategory = b.idcategory WHERE 
             b.idproduct = :idproduct", [
-                ":idproduct"=>$this->getidproduct()
+                ":idproduct" => $this->getidproduct()
             ]
         );
     }
-
-   
 }
 
 

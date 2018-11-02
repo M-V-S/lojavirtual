@@ -4,6 +4,8 @@ use \Hcode\Page;
 use \Hcode\Model\Category;
 use \Hcode\Model\Product;
 use \Hcode\Model\Cart;
+use \Hcode\Model\Address;
+use \Hcode\Model\User;
 
 
 //solicitar pagina principal do site
@@ -133,21 +135,85 @@ $app->get('/cart/:idproduct/remove', function($idproduct){
 });
 
 //Calcular frete
-$app->post('/cart/freight', function(){
-    
+$app->post('/cart/freight', function(){    
     $cart = Cart::getFromSession();
-
-   
 
     $cart->setFreight($_POST['zipcode']);
    
-
-
-
     header("Location: /cart");
     exit;
 
 });
+
+//checar
+$app->get('/checkout', function(){
+
+     User::verifyLogin(false);
+
+    $cart = Cart::getFromSession();
+
+
+
+
+    $address = new Address(); 
+
+    $page = new Page();
+    $page->setTpl("checkout", [
+        "cart" =>$cart->getValues(),
+        "address"=>$address->getValues()
+    ]);
+
+     exit;
+
+});
+
+//carregar login
+$app->get('/login', function(){
+    $page = new Page();
+    $page->setTpl("login",[
+        "error"=>User::getError()
+    ]);
+    exit;
+
+});
+
+//receber senha e password
+$app->post('/login', function(){
+    try{
+
+        User::login($_POST['login'], $_POST['password']);
+
+
+    }catch (Exception $e){
+        User::setError($e->getMessage());
+    }
+
+    header("Location: /checkout");
+    exit;
+
+});
+$app->get('/logout', function (){
+    User::logout();
+    header("Location: /login");
+    exit();
+
+});
+
+
+/*--------------------------*/
+$app->post('/register', function(){
+   $user = new User();
+
+   $user->setData($_POST);
+
+   $user->save();
+});
+
+
+
+
+
+
 
 
 
