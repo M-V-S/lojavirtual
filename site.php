@@ -148,7 +148,8 @@ $app->post('/cart/freight', function(){
 //checar
 $app->get('/checkout', function(){
 
-     User::verifyLogin(false);
+    User::verifyLogin(false);
+
 
     $cart = Cart::getFromSession();
 
@@ -171,7 +172,13 @@ $app->get('/checkout', function(){
 $app->get('/login', function(){
     $page = new Page();
     $page->setTpl("login",[
-        "error"=>User::getError()
+        "error"=>User::getError(),
+        "errorRegister"=>User::getErrorRegister(),
+        "registerValues"=> (isset($_SESSION['registerValues']))?$_SESSION['registerValues']:[
+            "name"=>'',
+            "email"=>'',
+            "phone"=>''
+        ]
     ]);
     exit;
 
@@ -179,10 +186,10 @@ $app->get('/login', function(){
 
 //receber senha e password
 $app->post('/login', function(){
+
     try{
 
         User::login($_POST['login'], $_POST['password']);
-
 
     }catch (Exception $e){
         User::setError($e->getMessage());
@@ -192,6 +199,7 @@ $app->post('/login', function(){
     exit;
 
 });
+
 $app->get('/logout', function (){
     User::logout();
     header("Location: /login");
@@ -202,11 +210,51 @@ $app->get('/logout', function (){
 
 /*--------------------------*/
 $app->post('/register', function(){
+   $_SESSION['registerValues'] = $_POST;
+    
+   if (!isset($_POST["name"]) || $_POST["name"] == '') {
+       User::setErrorRegister("Preencha seu nome.");
+       header("Location: /login");
+       exit;
+   }
+
+    if (!isset($_POST["email"]) || $_POST["email"] == '') {
+       User::setErrorRegister("Preencha seu email.");
+       header("Location: /login");
+       exit;
+    }
+
+    if (!isset($_POST["password"]) || $_POST["password"] == '') {
+       User::setErrorRegister("Preencha a senha.");
+       header("Location: /login");
+       exit;
+    }
+
+    if (User::checkLoginExist($_POST['email'])) {
+       User::setErrorRegister("Este endereço de e-mail já esta sendo usado por outra usuário.");
+       header("Location: /login");
+       exit;
+    }
+
    $user = new User();
 
-   $user->setData($_POST);
+   $user->setData([
+       'inadmin'=>0,
+       'deslogin'=>$_POST["email"],
+       'desperson'=>$_POST["name"],
+       'desemail'=>$_POST["email"],
+       'despassword'=>$_POST["password"],
+       'nrphone'=>$_POST["phone"]
+   ]);
 
    $user->save();
+
+   User::login($_POST["email"], $_POST["password"]);
+
+
+
+   header("Location: /checkout");
+   exit();
 });
 
 

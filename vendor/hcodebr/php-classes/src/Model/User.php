@@ -13,6 +13,8 @@ class User extends Model
     const SESSION = "User";
     const SECRET = "HcodePhp7_Secret";
     const ERROR = "UserError";
+    const ERROR_REGISTER = "UserErrorRegister";
+    const SUCCESS = "UserSucesss";
 
     public static function getFromSession()
     {
@@ -63,11 +65,12 @@ class User extends Model
             ":LOGIN" => $login
         ));
 
+
+
         //caso entre no if o fluxo é encerrado
         if (count($results) === 0) {
             throw new \Exception("Usuário inexistente ou senha inválida.");
         }
-
 
         $data = $results[0];
 
@@ -95,16 +98,22 @@ class User extends Model
 
     //verificar se o usuário é da admin ou site
     public static function verifyLogin($inadmin = true)
-    {
-
-
+    {    
         if (User::checkLogin($inadmin)) {
             if ($inadmin) {
                 header("Location: /admin/login");
             } else {
                 header("Location: /login");
             }
+        }else if($inadmin){
+
+            header("Location: /admin/login");
+        }else{
+            header("Location: /login");
         }
+
+        exit;
+            
     }
     //sair da conta
     public static function logout()
@@ -323,5 +332,31 @@ class User extends Model
        return password_hash($password, PASSWORD_DEFAULT, [
             "const" => 12]);
     }
+
+    /*****Erro campo limpo*******/
+    public  static function setErrorRegister($msg){
+            $_SESSION[User::ERROR_REGISTER] = $msg;
+    }
+
+    public static function getErrorRegister(){
+        $msg = (isset($_SESSION[User::ERROR_REGISTER]) && $_SESSION[User::ERROR_REGISTER])?$_SESSION[User::ERROR_REGISTER]:'';
+        User::clearErrorRegister();
+
+        return $msg;
+    }
+    public static function clearErrorRegister(){
+        $_SESSION[User::ERROR_REGISTER] = NULL;
+    }
+
+     /*****Verificar se user existe no bd*******/
+    public static function checkLoginExist($login){
+        $sql = new Sql();
+
+        $results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :deslogin",[
+            ":deslogin"=>$login
+        ]);
+
+        return (count($results) > 0);
+    } 
 }
 ?>
