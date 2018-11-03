@@ -150,11 +150,7 @@ $app->get('/checkout', function(){
 
     User::verifyLogin(false);
 
-
     $cart = Cart::getFromSession();
-
-
-
 
     $address = new Address(); 
 
@@ -189,7 +185,7 @@ $app->post('/login', function(){
 
     try{
 
-        User::login($_POST['login'], $_POST['password']);
+        $user = User::login($_POST['login'], $_POST['password']);
 
     }catch (Exception $e){
         User::setError($e->getMessage());
@@ -257,17 +253,67 @@ $app->post('/register', function(){
    exit();
 });
 
+/*------------------ESQUECEU SUA SENHA-----------------------*/
+//pedir pagina recuperação da senha
+$app->get('/forgot', function () {
+
+    $page = new Page();
+
+    $page->setTpl("forgot");
+
+});
+
+//receber email do forgot.html
+$app->post('/forgot', function () {
+
+    User::getForgot($_POST["email"], false);
+
+    header("Location: /forgot/sent");
+    exit();
+});
+
+//pagina para mostrar que o email foi enviado com sucesso
+$app->get('/forgot/sent', function () {
+
+    $page = new Page();
+
+    $page->setTpl("forgot-sent");
+    exit();
+});
+
+//apos o usuário clicar no link no email dele, ele é redirecionado para a rota asseguir 
+$app->get('/forgot/reset', function () {
 
 
+    $user = User::validForgotDecrypt($_GET["code"]);
+    
+    $page = new Page();
+    //carregar pagina para colocar nova senha
+    $page->setTpl("forgot-reset", array(
+        "name" => $user['desperson'],
+        "code" => $_GET["code"]
+    ));
+    exit();
+});
 
 
+$app->post('/forgot/reset', function () {
 
 
+    $forgot = User::validForgotDecrypt($_POST["code"]);
 
+    User::setForgotUser($forgot["idrecovery"]);
 
+    $user = new User();
 
+    $user->get((int)$forgot["iduser"]);
 
+    $password = User::getPasswordHash($_POST["password"]);
 
+    $user->setPassword($password);
 
+    $page = new Page();
 
-?>
+    $page->setTpl("forgot-reset-success");
+    exit();
+});

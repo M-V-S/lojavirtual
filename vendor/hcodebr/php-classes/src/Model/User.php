@@ -99,20 +99,15 @@ class User extends Model
     //verificar se o usuário é da admin ou site
     public static function verifyLogin($inadmin = true)
     {    
-        if (User::checkLogin($inadmin)) {
+        if (!User::checkLogin($inadmin)) {
             if ($inadmin) {
                 header("Location: /admin/login");
             } else {
                 header("Location: /login");
             }
-        }else if($inadmin){
-
-            header("Location: /admin/login");
-        }else{
-            header("Location: /login");
+            exit();
         }
 
-        exit;
             
     }
     //sair da conta
@@ -230,6 +225,8 @@ class User extends Model
                 $iv = random_bytes(openssl_cipher_iv_length('aes-256-cbc'));
                 $code = openssl_encrypt($dataRecovery['idrecovery'], 'aes-256-cbc', User::SECRET, 0, $iv);
                 $result = base64_encode($iv . $code);
+
+                //verificar se é admin ou user do site
                 if ($inadmin === true) {
                     $link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$result";
                 } else {
@@ -358,5 +355,7 @@ class User extends Model
 
         return (count($results) > 0);
     } 
+
+
 }
 ?>
