@@ -16,7 +16,8 @@ class Cart extends Model
     {
         $cart = new Cart();
         //se o isset for true e id for > 0, significa que o carrinho já foi inserido no bd e o carrinho esta na sessão
-        if (isset($_SESSION[Cart::SESSION]) && (int)$_SESSION[Cart::SESSION]['idcart'] > 0) {
+        if (isset($_SESSION[Cart::SESSION]) && (int)$_SESSION[Cart::SESSION]['idcart'] > 0) 
+        {
             //carregar o carrinho
             $cart->get((int)$_SESSION[Cart::SESSION]['idcart']);
 
@@ -26,13 +27,15 @@ class Cart extends Model
             $cart->getFromSessionID();
 
             //verificar se o carrinho não esta criado
-            if (!(int)$cart->getidcart() > 0) {
+            if (!(int)$cart->getidcart() > 0) 
+            {
                 //criar id da sessão
                 $data = [
                     "dessessionid" => session_id()
                 ];
                 //[false  não é admin], se retorna true, quer disser que esta logado
-                if (User::checkLogin(false)) {
+                if (User::checkLogin(false)) 
+                {
                     //salvar id, se o usuário estiver logado, [carrinho abandonado etc...]
                     $user = User::getFromSession();
 
@@ -45,7 +48,6 @@ class Cart extends Model
 
                 $cart->setToSession();
             }
-
         }
         return $cart;
     }
@@ -63,7 +65,8 @@ class Cart extends Model
             ":dessessionid" => session_id()
         ]);
 
-        if (count($results) > 0) {
+        if (count($results) > 0) 
+        {
             $this->setData($results[0]);
         }
     }
@@ -114,8 +117,9 @@ class Cart extends Model
     public function removeProduct(Product $product, $all = false)
     {
         $sql = new Sql();
-
-        if ($all) {
+        //se for verdadeiro remover todos
+        if ($all) 
+        {
             $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW()
          WHERE idcart = :idcart AND idproduct = :idproduct 
          AND dtremoved is NULL", [
@@ -124,21 +128,19 @@ class Cart extends Model
             ]);
         } else {
             $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW()
-         WHERE idcart = :idcart AND idproduct = :idproduct 
-         AND dtremoved is NULL LIMIT 1", [
+                       WHERE idcart = :idcart AND idproduct = :idproduct 
+                       AND dtremoved is NULL LIMIT 1", [
                 ":idcart" => $this->getidcart(),
                 ":idproduct" => $product->getidproduct()
             ]);
-
         }
 
         $this->getCalculateTotal();
     }
-
+    //retornar todos os produtos no carrinho
     public function getProduct()
     {
         $sql = new Sql();
-
 
         $rows = $sql->select("
             SELECT b.idproduct, b.desproduct , b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl, COUNT(*) AS nrqtd, SUM(b.vlprice) AS vltotal 
@@ -173,7 +175,6 @@ class Cart extends Model
         } else {
             return [];
         }
-
     }
 
     public function setFreight($nrzipcode)
@@ -184,7 +185,6 @@ class Cart extends Model
         $totals = $this->getProductsTotals();
 
         if (count($totals) === 0) {
-
 
         } else {
             if ($totals['vlheight'] < 2) $totals['vlheight'] = 2;
@@ -281,5 +281,3 @@ class Cart extends Model
         $this->setvltotal($totals['vlprice'] + $this->getvlfreight());
     }
 }
-
-?>

@@ -21,13 +21,12 @@ class User extends Model
         $user = new User();
         //se o isset for true e id for > 0, significa que o usuário já foi criado no bd e o usuário esta logado
         if (isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['iduser'] > 0) {
-
             $user->setData($_SESSION[User::SESSION]);
-
         }
 
         return $user;
     }
+
     //checar login
     public static function checkLogin($inadmin)
     {
@@ -45,11 +44,10 @@ class User extends Model
         } else {
 
             //só acessa o if se for admin
-            if ($inadmin === true && (bool)$_SESSION[User::SESSION]['iduser'] === true) {
+            if ($inadmin === true && (bool)$_SESSION[User::SESSION]['iduser'] === true) 
+            {
                 return true;
-
             } else if ($inadmin === false) {
-
                 return true;
             } else {
                 return false;
@@ -64,27 +62,23 @@ class User extends Model
         $results = $sql->select("SELECT * FROM tb_users a inner join tb_persons b on a.idperson = b.idperson WHERE a.deslogin = :LOGIN", array(
             ":LOGIN" => $login
         ));
-
-
-
         //caso entre no if o fluxo é encerrado
-        if (count($results) === 0) {
+        if (count($results) === 0)
+        {
             throw new \Exception("Usuário inexistente ou senha inválida.");
         }
 
         $data = $results[0];
 
         //validar senha
-        if (password_verify($password, $data['despassword']) === true) {
-
-
+        if (password_verify($password, $data['despassword']) === true)
+         {
             $user = new User();
 
             $data['desperson'] = utf8_encode($data['desperson']);
             $user->setData($data);
 
             $_SESSION[User::SESSION] = $user->getValues();
-
 
 
             return $user;
@@ -98,7 +92,7 @@ class User extends Model
 
     //verificar se o usuário é da admin ou site
     public static function verifyLogin($inadmin = true)
-    {    
+    {
         if (!User::checkLogin($inadmin)) {
             if ($inadmin) {
                 header("Location: /admin/login");
@@ -108,8 +102,9 @@ class User extends Model
             exit();
         }
 
-            
+
     }
+
     //sair da conta
     public static function logout()
     {
@@ -153,7 +148,7 @@ class User extends Model
         $data = $results[0];
 
         $data['desperson'] = utf8_encode($data['desperson']);
-        
+
         $this->setData($data);
     }
 
@@ -293,6 +288,7 @@ class User extends Model
             ":idrecovery" => $idrecovery
         ));
     }
+
     //atualizar senha
     public function setPassword($password)
     {
@@ -324,38 +320,64 @@ class User extends Model
     }
 
     //codificar senha
-    public static function getPasswordHash($password){
+    public static function getPasswordHash($password)
+    {
 
-       return password_hash($password, PASSWORD_DEFAULT, [
+        return password_hash($password, PASSWORD_DEFAULT, [
             "const" => 12]);
     }
 
     /*****Erro campo limpo*******/
-    public  static function setErrorRegister($msg){
-            $_SESSION[User::ERROR_REGISTER] = $msg;
+    public static function setErrorRegister($msg)
+    {
+        $_SESSION[User::ERROR_REGISTER] = $msg;
     }
 
-    public static function getErrorRegister(){
-        $msg = (isset($_SESSION[User::ERROR_REGISTER]) && $_SESSION[User::ERROR_REGISTER])?$_SESSION[User::ERROR_REGISTER]:'';
+    public static function getErrorRegister()
+    {
+        $msg = (isset($_SESSION[User::ERROR_REGISTER]) && $_SESSION[User::ERROR_REGISTER]) ? $_SESSION[User::ERROR_REGISTER] : '';
         User::clearErrorRegister();
 
         return $msg;
     }
-    public static function clearErrorRegister(){
+
+    public static function clearErrorRegister()
+    {
         $_SESSION[User::ERROR_REGISTER] = NULL;
     }
 
-     /*****Verificar se user existe no bd*******/
-    public static function checkLoginExist($login){
+    /*****Verificar se user existe no bd*******/
+    public static function checkLoginExist($login)
+    {
         $sql = new Sql();
 
-        $results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :deslogin",[
-            ":deslogin"=>$login
+        $results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :deslogin", [
+            ":deslogin" => $login
         ]);
 
         return (count($results) > 0);
-    } 
+    }
+
+    /*---------Error mensagem -------------------*/
+    public static function setSuccess($msg)
+    {
+        $_SESSION[User::SUCCESS] = $msg;
+    }
+
+    public static function getSuccess()
+    {
+        $msg = (isset($_SESSION[User::SUCCESS])) ? $_SESSION[User::SUCCESS] : '';
+
+        User::clierSuccess();
+
+        return $msg;
+    }
+
+    public static function clierSuccess()
+    {
+        $_SESSION[User::SUCCESS] = NULL;
+    }
 
 
 }
-?>
+

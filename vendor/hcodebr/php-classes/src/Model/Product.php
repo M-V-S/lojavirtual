@@ -151,4 +151,3 @@ class Product extends Model
 }
 
 
-?>

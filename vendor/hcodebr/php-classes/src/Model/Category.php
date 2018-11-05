@@ -142,9 +142,6 @@ class Category extends Model
             ':idproduct' => $product->getidproduct()
         ]);
     }
-
-
 }
 
 
-?>

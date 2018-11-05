@@ -155,7 +155,6 @@ $app->get('/admin/categories/:idcategory/products/:idproduct/remove', function (
 
     header("Location: /admin/categories/" . $idcategory . "/products");
 
-
     exit();
 });
 
