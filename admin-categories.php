@@ -10,13 +10,34 @@ use \Hcode\Model\Product;
 $app->get('/admin/categories', function () {
     User::verifyLogin();
 
+    $search = (isset($_GET['search']))? $_GET['search'] : '';
+    $page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
+    
+    if ($search != '') {
+         $pagination = Category::getPageSearch($search, $page);
+    }else{
 
-    $categories = Category::listAll();
+        $pagination = Category::getPage($page);
+    }
+
+    $pages = [];
+
+    for ($i=0; $i < $pagination['pages']; $i++) { 
+        array_push($pages, [
+            'href'=>'/admin/categories?'.http_build_query([
+                'page'=>$i+1,
+                'search'=>$search
+            ]),
+            'text'=>$i+1
+        ]);
+    }
 
     $pageAdmin = new PageAdmin();
 
     $pageAdmin->setTpl("categories", array(
-        "categories" => $categories
+       "categories" => $pagination['data'],
+       "search" => $search,
+       'pages' => $pages
     ));
 
     exit();
